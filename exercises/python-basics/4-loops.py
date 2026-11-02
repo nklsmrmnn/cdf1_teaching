@@ -8,9 +8,11 @@
 
 break_condition = 0
 
-...
-
-print("out of while loop")
+while break_condition <10:
+    break_condition = break_condition+1
+    print(break_condition)
+else:
+    print("out of while loop")
 
 # ----------------------------------------------
 
@@ -22,4 +24,5 @@ print("out of while loop")
 
 pets = ["dog", "cat", "horse", "rabbit", "snake"]
 
-print(pet)
+for i in pets:
+    print(pet)
