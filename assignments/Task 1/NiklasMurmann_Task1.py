@@ -1,0 +1,115 @@
+
+
+#Task 1 Workfile: Niklas Murmann
+#Will use more python within the next tasks .. ran out of time a bit for this final one
+
+
+import math
+import Rhino.Geometry as rg
+
+def create_cone(base_point=None, height=10.0, radius=5.0, cap_bottom=True):
+    """
+    Build a cone as a Brep.
+
+    base_point : Rhino.Geometry.Point3d -- center of the cone's base circle
+    height     : float -- cone height along the base plane's normal (Z by default)
+    radius     : float -- base circle radius
+    cap_bottom : bool  -- whether to cap the base circle (closed vs open cone)
+
+    Returns a Rhino.Geometry.Brep.
+    """
+    if base_point is None:
+        base_point = rg.Point3d(0, 0, 0)
+
+    plane = rg.Plane(base_point, rg.Vector3d.ZAxis)
+    cone = rg.Cone(plane, height, radius)
+    return cone.ToBrep(cap_bottom)
+
+def create_sphere(center_point= None, radius=5.0):
+    """
+    Build a sphere as a Brep.
+
+    center_point : Rhino.Geometry.Point3d -- center of the sphere
+    radius       : float -- sphere radius
+
+    Returns a Rhino.Geometry.Brep.
+    """
+    if center_point is None:
+        center_point = rg.Point3d(0, 0, 0)
+
+    sphere = rg.Sphere(center_point, radius)
+    return sphere.ToBrep()
+
+def create_cube(
+    origin_point,
+    x_length: float,
+    y_length: float,
+    z_length: float,
+):
+    """
+    Build a cube or rectangular box as a Brep.
+
+    origin_point : Rhino.Geometry.Point3d -- lower-left corner of the box
+    x_length     : float -- length along the X axis
+    y_length     : float -- length along the Y axis
+    z_length     : float -- length along the Z axis
+
+    In Grasshopper, set origin_point's type hint to Point3d and connect a
+    floating-point slider to each length input.
+
+    Returns a Rhino.Geometry.Brep.
+    """
+    if not isinstance(origin_point, rg.Point3d):
+        raise TypeError(
+            "origin_point must be a Rhino.Geometry.Point3d. "
+            "Set the Grasshopper input type hint to Point3d."
+        )
+
+    min_point = origin_point
+    max_point = rg.Point3d(
+        origin_point.X + x_length,
+        origin_point.Y + y_length,
+        origin_point.Z + z_length,
+    )
+
+    box = rg.Box(rg.BoundingBox(min_point, max_point))
+    return box.ToBrep()
+
+
+def boolean_difference(brep_a, brep_b):
+    """
+    Perform a boolean difference operation between two Breps.
+
+    brep_a : Rhino.Geometry.Brep -- the first Brep
+    brep_b : Rhino.Geometry.Brep -- the second Brep to subtract from the first
+
+    Returns a list of Rhino.Geometry.Brep resulting from the difference.
+    """
+    if brep_a is None or brep_b is None:
+        raise ValueError("Both brep_a and brep_b must be provided.")
+
+    result = rg.Brep.CreateBooleanDifference(brep_a, brep_b, 0.001)
+    return result
+
+
+def copy_brep_along_z(brep, distance, copy_count):
+    """
+    Create copies of a Brep, each offset in the +Z direction.
+
+    brep : Rhino.Geometry.Brep -- the Brep to copy
+    distance : float -- the Z spacing between consecutive copies
+    copy_count : int -- the number of copies to create
+
+    Returns a list of Rhino.Geometry.Brep copies; copy i is moved by distance * (i + 1).
+    """
+    if brep is None:
+        raise ValueError("brep must be provided.")
+    if copy_count < 0:
+        raise ValueError("copy_count must not be negative.")
+
+    copies = []
+    for i in range(1, int(copy_count) + 1):
+        copy = brep.DuplicateBrep()
+        copy.Transform(rg.Transform.Translation(rg.Vector3d(0, 0, distance * i)))
+        copies.append(copy)
+    return copies

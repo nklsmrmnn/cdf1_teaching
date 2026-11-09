@@ -35,7 +35,7 @@ def create_cone(base_point=None, height=10.0, radius=5.0, cap_bottom=True):
     cone = rg.Cone(plane, height, radius)
     return cone.ToBrep(cap_bottom)
 
-def create_sphere(center_point=None, radius=5.0):
+def create_sphere(center_point= None, radius=5.0):
     """
     Build a sphere as a Brep.
 
@@ -50,22 +50,38 @@ def create_sphere(center_point=None, radius=5.0):
     sphere = rg.Sphere(center_point, radius)
     return sphere.ToBrep()
 
-def create_cube(center_point=None, side_length=10.0):
+def create_cube(
+    origin_point,
+    x_length: float,
+    y_length: float,
+    z_length: float,
+):
     """
-    Build a cube as a Brep.
+    Build a cube or rectangular box as a Brep.
 
-    center_point : Rhino.Geometry.Point3d -- center of the cube
-    side_length  : float -- length of each side of the cube
+    origin_point : Rhino.Geometry.Point3d -- lower-left corner of the box
+    x_length     : float -- length along the X axis
+    y_length     : float -- length along the Y axis
+    z_length     : float -- length along the Z axis
+
+    In Grasshopper, set origin_point's type hint to Point3d and connect a
+    floating-point slider to each length input.
 
     Returns a Rhino.Geometry.Brep.
     """
-    if center_point is None:
-        center_point = rg.Point3d(0, 0, 0)
+    if not isinstance(origin_point, rg.Point3d):
+        raise TypeError(
+            "origin_point must be a Rhino.Geometry.Point3d. "
+            "Set the Grasshopper input type hint to Point3d."
+        )
 
-    half_side = side_length / 2.0
-    min_point = rg.Point3d(center_point.X - half_side, center_point.Y - half_side, center_point.Z - half_side)
-    max_point = rg.Point3d(center_point.X + half_side, center_point.Y + half_side, center_point.Z + half_side)
-    
+    min_point = origin_point
+    max_point = rg.Point3d(
+        origin_point.X + x_length,
+        origin_point.Y + y_length,
+        origin_point.Z + z_length,
+    )
+
     box = rg.Box(rg.BoundingBox(min_point, max_point))
     return box.ToBrep()
 
