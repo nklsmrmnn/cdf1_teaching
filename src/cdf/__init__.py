@@ -25,4 +25,8 @@ from .algorithms import *
 
 # If you add a new python file...
 
+from .geometry_basics import *
+from .algorithms import *
+from .algorithm_nm import *
+
 __all__ = []
